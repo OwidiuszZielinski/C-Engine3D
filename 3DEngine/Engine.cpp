@@ -8,7 +8,6 @@
 Engine* Engine::instance = nullptr;
 
 Engine::Engine(int argc, char** argv) {
-
     glutInit(&argc, argv);
     instance = this;
     running = true;
@@ -20,12 +19,17 @@ Engine::Engine(int argc, char** argv) {
     currentShape = ' ';
     rotationX = 0.0f;
     rotationY = 0.0f;
+    rotationSpeedX = 0.1f;  // Pocz¹tkowa prêdkoœæ obrotu
+    rotationSpeedY = 0.1f;  // Pocz¹tkowa prêdkoœæ obrotu
     lastShape = '\0';
     clickX = 0.0f;
     clickY = 0.0f;
+    objectPosX = 0.0f;
+    objectPosY = 0.0f;
+    objectPosZ = 0.0f;
     drawOnClick = false;
-   
-
+    animate = false;  // Pocz¹tkowo animacja wy³¹czona
+    shadingIntensity = 0.0f;
     std::srand(std::time(0)); // Seed the random number generator
 }
 
@@ -66,8 +70,6 @@ void Engine::initWindow(int width, int height, const char* title, bool fullscree
     camera.setTarget(0.0f, 0.0f, 0.0f); // Make sure the target is correct
 }
 
-
-
 void Engine::setGraphicsMode(int fps, bool enableMouse, bool enableKeyboard, bool doubleBuffer, bool zBuffer) {
     this->fps = fps;
     if (doubleBuffer) {
@@ -79,6 +81,7 @@ void Engine::setGraphicsMode(int fps, bool enableMouse, bool enableKeyboard, boo
 }
 
 void Engine::run() {
+    glutTimerFunc(1000 / fps, timerCallback, 0);  // Ustawienie pierwszego timera
     glutMainLoop();
 }
 
@@ -113,8 +116,11 @@ void Engine::displayCallback() {
 }
 
 void Engine::idleCallback() {
+    instance->animateObject();
     glutPostRedisplay();
 }
+
+
 
 void Engine::keyboardCallback(unsigned char key, int x, int y) {
     if (key == 27) { // Escape key
@@ -124,7 +130,6 @@ void Engine::keyboardCallback(unsigned char key, int x, int y) {
     }
     instance->currentShape = key; // ustawienie aktualnego kszta³tu
 
-    // Add camera control keys with more subtle changes
     switch (key) {
     case 'b':
     case 'B':
@@ -133,14 +138,25 @@ void Engine::keyboardCallback(unsigned char key, int x, int y) {
     case 8: // Backspace key
         instance->setClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Ustawienie koloru t³a na czarny
         break;
+    case 'a':
+        
+        instance->animate = !instance->animate;
+        
+        break;
+    case '+':
+        instance->rotationSpeedX += 0.1f;
+        instance->rotationSpeedY += 0.1f;
+        break;
+    case '-':
+        instance->rotationSpeedX -= 0.1f;
+        instance->rotationSpeedY -= 0.1f;
+        break;
     default:
         break;
     }
 
-    // Wywo³anie funkcji aktualizuj¹cej scenê
     glutPostRedisplay();
 }
-
 
 void Engine::specialKeyCallback(int key, int x, int y) {
     switch (key) {
@@ -192,9 +208,65 @@ void Engine::specialKeyCallback(int key, int x, int y) {
 }
 
 void Engine::mouseCallback(int button, int state, int x, int y) {
-    // tutaj dodaj obs³ugê myszy
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        instance->clickX = x;
+        instance->clickY = y;
+        instance->updateObjectPosition(instance->clickX, instance->clickY);
+        glutPostRedisplay(); // Zaktualizuj ekran po klikniêciu
+    }
+    else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
+        instance->toggleLighting();
+        glutPostRedisplay(); // Zaktualizuj ekran po wy³¹czeniu/w³¹czeniu oœwietlenia
+    }
+    else if ((button == 3 || button == 4) && state == GLUT_DOWN) { // Rolka w górê (3) lub w dó³ (4)
+        if (button == 3) {
+            glShadeModel(GL_SMOOTH);
+            std::cout << "Zmiana cieniowania na: GL_SMOOTH" << std::endl;
+        }
+        else if (button == 4) {
+            glShadeModel(GL_FLAT);
+            std::cout << "Zmiana cieniowania na: GL_FLAT" << std::endl;
+        }
+        glutPostRedisplay(); // Zaktualizuj ekran po zmianie intensywnoœci cieniowania
+    }
+
 }
 
+void Engine::toggleLighting() {
+    static bool lightingEnabled = true;
+    if (lightingEnabled) {
+        glDisable(GL_LIGHTING); // Wy³¹cz oœwietlenie
+    }
+    else {
+        glEnable(GL_LIGHTING); // W³¹cz oœwietlenie
+    }
+    lightingEnabled = !lightingEnabled; // Prze³¹cz stan oœwietlenia
+}
+
+
+void Engine::updateObjectPosition(int x, int y) {
+    
+    GLint viewport[4];
+    GLdouble modelview[16];
+    GLdouble projection[16];
+    GLfloat winX, winY, winZ;
+    GLdouble posX, posY, posZ;
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+    glGetDoublev(GL_PROJECTION_MATRIX, projection);
+
+    winX = (float)x;
+    winY = (float)viewport[3] - (float)y; // Przekszta³cenie wspó³rzêdnych okna
+    glReadPixels(x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+
+    if (winZ == 1.0f) winZ = 0.999f;
+    gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+
+    instance->objectPosX = posX;
+    instance->objectPosY = posY;
+    instance->objectPosZ = posZ;
+    std::cout << "Kliknieto w: (" << x << ", " << y << "), wspolrzedne swiata: (" << instance->objectPosX << ", " << instance->objectPosY << ", " << instance->objectPosZ << ")" << std::endl;
+}
 void Engine::drawScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
@@ -206,6 +278,8 @@ void Engine::drawScene() {
     GLfloat lightPos[] = { 1.0, 1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
+
+
     // Draw the selected shape
     drawShape();
 
@@ -215,9 +289,10 @@ void Engine::drawScene() {
 void Engine::drawShape() {
     glColor3f(1.0f, 0.0f, 0.0f); // Ustawienie koloru na czerwony
     glPushMatrix();
+    glTranslatef(objectPosX, objectPosY, objectPosZ); // Ustawienie pozycji obiektu
     glRotatef(rotationX, 1.0, 0.0, 0.0); // Obrót wzd³u¿ osi X
     glRotatef(rotationY, 0.0, 1.0, 0.0); // Obrót wzd³u¿ osi Y
-    
+
     if (currentShape != lastShape) {
         // Aktualizacja zmiennej lastShape
         lastShape = currentShape;
@@ -291,6 +366,24 @@ void Engine::drawShape() {
     glPopMatrix();
 }
 
+void Engine::animateObject() {
+    if (animate) {
+        rotationX += rotationSpeedX;
+        rotationY += rotationSpeedY;
+        if (rotationX > 360.0f) rotationX -= 360.0f;
+        if (rotationY > 360.0f) rotationY -= 360.0f;
+        glutPostRedisplay();  // Aktualizacja ekranu
+        glPopMatrix();
+    }
+}
+
+void Engine::timerCallback(int value) {
+    if (instance->running) {
+        instance->animateObject();
+        glutPostRedisplay();
+        glutTimerFunc(1000 / instance->fps, timerCallback, value);
+    }
+}
 
 void Engine::changeBackgroundColor() {
     float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -298,7 +391,6 @@ void Engine::changeBackgroundColor() {
     float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     setClearColor(r, g, b, 1.0f);
     std::cout << "Zmieniono kolor tla na: (" << r << ", " << g << ", " << b << ")" << std::endl;
-    
 }
 
 void Engine::changeCameraPosition(float dx, float dy, float dz) {
@@ -311,6 +403,5 @@ int main(int argc, char** argv) {
     engine.initWindow(1440, 900, "Game Engine", false);
     engine.setGraphicsMode(60, true, true, true, true);
     engine.run();
-
     return 0;
 }
