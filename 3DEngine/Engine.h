@@ -20,10 +20,10 @@ public:
     static void keyboardCallback(unsigned char key, int x, int y);
     static void specialKeyCallback(int key, int x, int y);
     static void mouseCallback(int button, int state, int x, int y);
-    static void mouseWheelCallback(int wheel, int direction, int x, int y);
+    static void changeFPS(int fps);
     static void timerCallback(int value);  // Deklaracja funkcji timerCallback
     static void toggleLighting();
-    static void changeShadingIntensity(float amount);
+    
     static Engine* instance;
 
 private:

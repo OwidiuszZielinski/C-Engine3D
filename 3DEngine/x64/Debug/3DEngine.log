@@ -1,10 +1,10 @@
 ﻿  Engine.cpp
-C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(25,14): warning C4244: "=": konwersja z "float" do "int", możliwa utrata danych
-C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(26,14): warning C4244: "=": konwersja z "float" do "int", możliwa utrata danych
-C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(33,25): warning C4244: "argument": konwersja z "time_t" do "unsigned int", możliwa utrata danych
-C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(266,28): warning C4244: "=": konwersja z "GLdouble" do "float", możliwa utrata danych
-C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(267,28): warning C4244: "=": konwersja z "GLdouble" do "float", możliwa utrata danych
-C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(268,28): warning C4244: "=": konwersja z "GLdouble" do "float", możliwa utrata danych
+C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(27,14): warning C4244: "=": konwersja z "float" do "int", możliwa utrata danych
+C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(28,14): warning C4244: "=": konwersja z "float" do "int", możliwa utrata danych
+C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(35,25): warning C4244: "argument": konwersja z "time_t" do "unsigned int", możliwa utrata danych
+C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(283,28): warning C4244: "=": konwersja z "GLdouble" do "float", możliwa utrata danych
+C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(284,28): warning C4244: "=": konwersja z "GLdouble" do "float", możliwa utrata danych
+C:\Users\Owidiusz Zieliński\Desktop\3DEngine\3DEngine\Engine.cpp(285,28): warning C4244: "=": konwersja z "GLdouble" do "float", możliwa utrata danych
   3DEngine.vcxproj -> C:\Users\Owidiusz Zieliński\Desktop\3DEngine\x64\Debug\3DEngine.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.

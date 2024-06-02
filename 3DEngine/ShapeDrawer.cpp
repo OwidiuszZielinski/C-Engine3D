@@ -28,37 +28,64 @@ void ShapeDrawer::drawCone(float base, float height, int slices, int stacks) {
     glutSolidCone(base, height, slices, stacks);
 }
 void ShapeDrawer::drawTriangle(float size) {
-    glBegin(GL_TRIANGLES);           // Begin drawing the pyramid with 4 triangles
-      // Front
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, 1.0f);
+    // Begin drawing the pyramid with 4 triangles
+    glBegin(GL_TRIANGLES);
 
-    // Right
+    // Front face
     glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    
-    glVertex3f(1.0f, -1.0f, 1.0f);
-   
-    glVertex3f(1.0f, -1.0f, -1.0f);
+    glVertex3f(0.0f, size, 0.0f);
+    glVertex3f(-size, -size, size);
+    glVertex3f(size, -size, size);
 
-    // Back
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    
-    glVertex3f(-1.0f, -1.0f, -1.0f);
+    // Right face
+    glColor3f(0.0f, 1.0f, 0.0f);     // Green
+    glVertex3f(0.0f, size, 0.0f);
+    glVertex3f(size, -size, size);
+    glVertex3f(0.0f, -size, -size);
 
-    // Left
-    glColor3f(1.0f, 0.0f, 0.0f);       // Red
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-   
-    glVertex3f(-1.0f, -1.0f, 1.0f);
+    // Back face
+    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
+    glVertex3f(0.0f, size, 0.0f);
+    glVertex3f(0.0f, -size, -size);
+    glVertex3f(-size, -size, size);
+
+    // Base (triangle)
+    glColor3f(1.0f, 1.0f, 0.0f);     // Yellow
+    glVertex3f(-size, -size, size);
+    glVertex3f(size, -size, size);
+    glVertex3f(0.0f, -size, -size);
+
     glEnd();   // Done drawing the pyramid
-}
 
+    // Begin drawing the edges of the pyramid
+    glBegin(GL_LINES);
+
+    glColor3f(1.0f, 1.0f, 1.0f);     // White for edges
+    // Front edge
+    glVertex3f(0.0f, size, 0.0f);
+    glVertex3f(-size, -size, size);
+
+    glVertex3f(0.0f, size, 0.0f);
+    glVertex3f(size, -size, size);
+
+    // Right edge
+    glVertex3f(0.0f, size, 0.0f);
+    glVertex3f(0.0f, -size, -size);
+
+    // Left edge
+    glVertex3f(0.0f, size, 0.0f);
+    glVertex3f(-size, -size, size);
+
+    // Base edges
+    glVertex3f(-size, -size, size);
+    glVertex3f(size, -size, size);
+
+    glVertex3f(size, -size, size);
+    glVertex3f(0.0f, -size, -size);
+
+    glVertex3f(0.0f, -size, -size);
+    glVertex3f(-size, -size, size);
+
+    glEnd(); // Done drawing the edges
+}
 
