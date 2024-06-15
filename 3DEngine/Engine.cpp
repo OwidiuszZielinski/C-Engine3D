@@ -1,3 +1,4 @@
+
 #include "Engine.h"
 #include "ShapeDrawer.h"
 #include <GL/freeglut.h>
@@ -5,42 +6,58 @@
 #include <cstdlib>
 #include <ctime>
 
-// Inicjalizacja wskaŸnika do instancji klasy Engine
-Engine* Engine::instance = nullptr;
+/**
+ * @brief Inicjalizacja wskaznika do instancji klasy Engine.
+ */
+    Engine* Engine::instance = nullptr;
 
-// Konstruktor klasy Engine
+/**
+ * @brief Konstruktor klasy Engine.
+ *
+ * @param argc Liczba argumentow przekazywanych do aplikacji.
+ * @param argv Tablica argumentow przekazywanych do aplikacji.
+ */
 Engine::Engine(int argc, char** argv) {
-    glutInit(&argc, argv);
-    instance = this;
-    running = true;
-    fps = 60;
-    size = 1.0f;
-    radius = 0.5f;
-    innerRadius = 0.2f;
-    height = 1.0f;
-    currentShape = ' ';
-    rotationX = 0.0f;
-    rotationY = 0.0f;
-    rotationSpeedX = 0.1f;  // Pocz¹tkowa prêdkoœæ obrotu
-    rotationSpeedY = 0.1f;  // Pocz¹tkowa prêdkoœæ obrotu
-    lastShape = '\0';
-    clickX = 0.0f;
-    clickY = 0.0f;
-    objectPosX = 0.0f;
-    objectPosY = 0.0f;
-    objectPosZ = 0.0f;
-    drawOnClick = false;
-    animate = false;  // Pocz¹tkowo animacja wy³¹czona
-    shadingIntensity = 0.0f;
-    std::srand(std::time(0)); // Ustawienie seeda dla generatora liczb losowych
+    glutInit(&argc, argv);            // Inicjalizacja GLUT
+    instance = this;                  // Ustawienie wskaznika instancji na biezacy obiekt
+    running = true;                   // Ustawienie flagi uruchomienia na true
+    fps = 60;                         // Ustawienie liczby klatek na sekunde
+    size = 1.0f;                      // Ustawienie domyslnego rozmiaru obiektu
+    radius = 0.5f;                    // Ustawienie domyslnego promienia obiektu
+    innerRadius = 0.2f;               // Ustawienie domyslnego wewnetrznego promienia obiektu
+    height = 1.0f;                    // Ustawienie domyslnej wysokosci obiektu
+    currentShape = ' ';               // Ustawienie domyslnego biezacego ksztaltu
+    rotationX = 0.0f;                 // Ustawienie poczatkowej wartosci obrotu w osi X
+    rotationY = 0.0f;                 // Ustawienie poczatkowej wartosci obrotu w osi Y
+    rotationSpeedX = 0.1f;            // Poczatkowa predkosc obrotu w osi X
+    rotationSpeedY = 0.1f;            // Poczatkowa predkosc obrotu w osi Y
+    lastShape = '\0';                 // Inicjalizacja ostatniego ksztaltu
+    clickX = 0.0f;                    // Inicjalizacja pozycji klikniecia w osi X
+    clickY = 0.0f;                    // Inicjalizacja pozycji klikniecia w osi Y
+    objectPosX = 0.0f;                // Inicjalizacja pozycji obiektu w osi X
+    objectPosY = 0.0f;                // Inicjalizacja pozycji obiektu w osi Y
+    objectPosZ = 0.0f;                // Inicjalizacja pozycji obiektu w osi Z
+    drawOnClick = false;              // Inicjalizacja flagi rysowania po kliknieciu
+    animate = false;                  // Poczatkowo animacja wylaczona
+    shadingIntensity = 0.0f;          // Inicjalizacja intensywnosci cieniowania
+    std::srand(std::time(0));         // Ustawienie seeda dla generatora liczb losowych
 }
 
-// Destruktor klasy Engine
+/**
+ * @brief Destruktor klasy Engine.
+ */
 Engine::~Engine() {
     close();
 }
 
-// Inicjalizacja okna
+/**
+ * @brief Inicjalizacja okna.
+ *
+ * @param width Szerokosc okna.
+ * @param height Wysokosc okna.
+ * @param title Tytul okna.
+ * @param fullscreen Czy okno ma byc w trybie pelnoekranowym.
+ */
 void Engine::initWindow(int width, int height, const char* title, bool fullscreen) {
     if (fullscreen) {
         glutEnterGameMode();
@@ -58,7 +75,7 @@ void Engine::initWindow(int width, int height, const char* title, bool fullscree
     glutSpecialFunc(specialKeyCallback);
     glutMouseFunc(mouseCallback);
 
-    // W³¹czenie testu g³êbokoœci i oœwietlenia
+    // Wlaczenie testu glebokosci i oswietlenia
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -67,7 +84,7 @@ void Engine::initWindow(int width, int height, const char* title, bool fullscree
 
     // Ustawienie perspektywy
     glMatrixMode(GL_PROJECTION);
-    gluPerspective(45.0, (double)width / (double)height, 1.0, 100.0); // Ustawienie p³aszczyzny bliskiej i dalekiej
+    gluPerspective(45.0, (double)width / (double)height, 1.0, 100.0); // Ustawienie plaszczyzny bliskiej i dalekiej
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -79,7 +96,15 @@ void Engine::initWindow(int width, int height, const char* title, bool fullscree
     glutTimerFunc(1000 / fps, timerCallback, 0);
 }
 
-// Ustawienie trybu graficznego
+/**
+ * @brief Ustawienie trybu graficznego.
+ *
+ * @param fps Liczba klatek na sekunde.
+ * @param enableMouse Czy myszka ma byc wlaczona.
+ * @param enableKeyboard Czy klawiatura ma byc wlaczona.
+ * @param doubleBuffer Czy podwojne buforowanie ma byc wlaczone.
+ * @param zBuffer Czy bufor Z ma byc wlaczony.
+ */
 void Engine::setGraphicsMode(int fps, bool enableMouse, bool enableKeyboard, bool doubleBuffer, bool zBuffer) {
     this->fps = fps;
     if (doubleBuffer) {
@@ -90,12 +115,21 @@ void Engine::setGraphicsMode(int fps, bool enableMouse, bool enableKeyboard, boo
     }
 }
 
-// Uruchomienie g³ównej pêtli aplikacji
+/**
+ * @brief Uruchomienie glownej petli aplikacji.
+ */
 void Engine::run() {
     glutMainLoop();
 }
 
-// Ustawienie koloru t³a
+/**
+ * @brief Ustawienie koloru tla.
+ *
+ * @param r Skladowa koloru czerwonego.
+ * @param g Skladowa koloru zielonego.
+ * @param b Skladowa koloru niebieskiego.
+ * @param a Skladowa przezroczystosci.
+ */
 void Engine::setClearColor(float r, float g, float b, float a) {
     clearColor[0] = r;
     clearColor[1] = g;
@@ -104,7 +138,11 @@ void Engine::setClearColor(float r, float g, float b, float a) {
     glClearColor(r, g, b, a);
 }
 
-// Zmiana projekcji
+/**
+ * @brief Zmiana projekcji.
+ *
+ * @param projectionType Typ projekcji: 0 dla ortograficznej, 1 dla perspektywicznej.
+ */
 void Engine::changeProjection(int projectionType) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -117,32 +155,44 @@ void Engine::changeProjection(int projectionType) {
     glMatrixMode(GL_MODELVIEW);
 }
 
-// Zamkniêcie okna
+/**
+ * @brief Zamkniecie okna.
+ */
 void Engine::close() {
     if (glutGetWindow()) {
         glutDestroyWindow(glutGetWindow());
     }
 }
 
-// Funkcja callback do wyœwietlania sceny
+/**
+ * @brief Funkcja callback do wyswietlania sceny.
+ */
 void Engine::displayCallback() {
     instance->drawScene();
 }
 
-// Funkcja callback wywo³ywana w stanie bezczynnoœci
+/**
+ * @brief Funkcja callback wywolywana w stanie bezczynnosci.
+ */
 void Engine::idleCallback() {
     instance->animateObject();
     glutPostRedisplay();
 }
 
-// Funkcja callback obs³uguj¹ca naciœniêcia klawiszy
+/**
+ * @brief Funkcja callback obslugujaca nacisniecia klawiszy.
+ *
+ * @param key Nacisniety klawisz.
+ * @param x Pozycja kursora myszy w osi X.
+ * @param y Pozycja kursora myszy w osi Y.
+ */
 void Engine::keyboardCallback(unsigned char key, int x, int y) {
     if (key == 27) { // Klawisz Escape
         instance->running = false;
         instance->close();
         exit(0);
     }
-    instance->currentShape = key; // Ustawienie aktualnego kszta³tu
+    instance->currentShape = key; // Ustawienie aktualnego ksztaltu
 
     switch (key) {
     case 'b':
@@ -150,7 +200,7 @@ void Engine::keyboardCallback(unsigned char key, int x, int y) {
         instance->changeBackgroundColor();
         break;
     case 8: // Klawisz Backspace
-        instance->setClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Ustawienie koloru t³a na czarny
+        instance->setClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Ustawienie koloru tla na czarny
         break;
     case 'a':
         instance->animate = !instance->animate;
@@ -164,7 +214,7 @@ void Engine::keyboardCallback(unsigned char key, int x, int y) {
         instance->rotationSpeedY -= 0.1f;
         break;
     case 'z':
-        instance->changeFPS(5); // Zwiêkszenie FPS o 5
+        instance->changeFPS(5); // Zwiekszenie FPS o 5
         break;
     case 'x':
         instance->changeFPS(-5); // Zmniejszenie FPS o 5
@@ -172,48 +222,56 @@ void Engine::keyboardCallback(unsigned char key, int x, int y) {
     }
 }
 
-// Funkcja callback obs³uguj¹ca specjalne klawisze
+/**
+ * @brief Funkcja callback obslugujaca
+
+ specjalne klawisze.
+ *
+ * @param key Nacisniety specjalny klawisz.
+ * @param x Pozycja kursora myszy w osi X.
+ * @param y Pozycja kursora myszy w osi Y.
+ */
 void Engine::specialKeyCallback(int key, int x, int y) {
     switch (key) {
     case GLUT_KEY_F1:
-        instance->changeCameraPosition(0.0f, 1.0f, 0.0f);
+        instance->changeCameraPosition(0.0f, 1.0f, 0.0f); // Przesuniecie kamery w gore
         break;
-    case GLUT_KEY_F2: // Przesuniêcie kamery w dó³
+    case GLUT_KEY_F2: // Przesuniecie kamery w dol
         instance->changeCameraPosition(0.0f, -1.0f, 0.0f);
         break;
-    case GLUT_KEY_F3: // Przesuniêcie kamery w lewo
+    case GLUT_KEY_F3: // Przesuniecie kamery w lewo
         instance->changeCameraPosition(-1.0f, 0.0f, 0.0f);
         break;
-    case GLUT_KEY_F4: // Przesuniêcie kamery w prawo
+    case GLUT_KEY_F4: // Przesuniecie kamery w prawo
         instance->changeCameraPosition(1.0f, 0.0f, 0.0f);
         break;
-    case GLUT_KEY_F5: // Przesuniêcie kamery do przodu
+    case GLUT_KEY_F5: // Przesuniecie kamery do przodu
         instance->changeCameraPosition(0.0f, 0.0f, -1.0f);
         break;
-    case GLUT_KEY_F6: // Przesuniêcie kamery do ty³u
+    case GLUT_KEY_F6: // Przesuniecie kamery do tylu
         instance->changeCameraPosition(0.0f, 0.0f, 1.1f);
         break;
     case GLUT_KEY_LEFT:
-        instance->rotationY -= 5.0f;
+        instance->rotationY -= 5.0f; // Obrot w lewo
         break;
     case GLUT_KEY_RIGHT:
-        instance->rotationY += 5.0f;
+        instance->rotationY += 5.0f; // Obrot w prawo
         break;
     case GLUT_KEY_UP:
-        instance->rotationX -= 5.0f;
+        instance->rotationX -= 5.0f; // Obrot w gore
         break;
     case GLUT_KEY_DOWN:
-        instance->rotationX += 5.0f;
+        instance->rotationX += 5.0f; // Obrot w dol
         break;
     case GLUT_KEY_F7:
-        instance->size += 0.1f;
+        instance->size += 0.1f; // Zwiekszenie rozmiaru
         instance->height += 0.1f;
         instance->innerRadius += 0.1f;
         instance->radius += 0.1f;
-        std::cout << "Zwiêkszono rozmiar: size=" << instance->size << ", height=" << instance->height << ", innerRadius=" << instance->innerRadius << ", radius=" << instance->radius << std::endl;
+        std::cout << "Zwiekszono rozmiar: size=" << instance->size << ", height=" << instance->height << ", innerRadius=" << instance->innerRadius << ", radius=" << instance->radius << std::endl;
         break;
     case GLUT_KEY_F8:
-        instance->size -= 0.1f;
+        instance->size -= 0.1f; // Zmniejszenie rozmiaru
         instance->height -= 0.1f;
         instance->innerRadius -= 0.1f;
         instance->radius -= 0.1f;
@@ -223,99 +281,121 @@ void Engine::specialKeyCallback(int key, int x, int y) {
     glutPostRedisplay();
 }
 
-// Funkcja callback obs³uguj¹ca klikniêcia myszy
+/**
+ * @brief Funkcja callback obslugujaca klikniecia myszy.
+ *
+ * @param button Nacisniety przycisk myszy.
+ * @param state Stan przycisku myszy (GLUT_DOWN lub GLUT_UP).
+ * @param x Pozycja kursora myszy w osi X.
+ * @param y Pozycja kursora myszy w osi Y.
+ */
 void Engine::mouseCallback(int button, int state, int x, int y) {
-    instance->size = 17.0f;
-    instance->radius = 8.5f;
-    instance->innerRadius = 1.4f;
-    instance->height = 17.0f;
+
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        instance->clickX = x;
-        instance->clickY = y;
+        instance->size = 17.0f;           // Ustawienie domyslnego rozmiaru obiektu
+        instance->radius = 8.5f;          // Ustawienie domyslnego promienia obiektu
+        instance->innerRadius = 1.4f;     // Ustawienie domyslnego wewnetrznego promienia obiektu
+        instance->height = 17.0f;         // Ustawienie domyslnej wysokosci obiektu
+        instance->clickX = x;         // Zapisanie pozycji klikniecia w osi X
+        instance->clickY = y;         // Zapisanie pozycji klikniecia w osi Y
         instance->updateObjectPosition(instance->clickX, instance->clickY);
     }
     else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN) {
+
         instance->toggleLighting();
     }
-    else if ((button == 3 || button == 4) && state == GLUT_DOWN) { // Rolka w górê (3) lub w dó³ (4)
+    else if ((button == 3 || button == 4) && state == GLUT_DOWN) { // Rolka w gore (3) lub w dol (4)
         if (button == 3) {
-            glShadeModel(GL_SMOOTH);
+            glShadeModel(GL_SMOOTH);  // Zmiana cieniowania na GL_SMOOTH
             std::cout << "Zmiana cieniowania na: GL_SMOOTH" << std::endl;
         }
         else if (button == 4) {
-            glShadeModel(GL_FLAT);
+            glShadeModel(GL_FLAT);    // Zmiana cieniowania na GL_FLAT
             std::cout << "Zmiana cieniowania na: GL_FLAT" << std::endl;
         }
-        glutPostRedisplay(); // Zaktualizuj ekran po zmianie intensywnoœci cieniowania
+        glutPostRedisplay(); // Zaktualizuj ekran po zmianie intensywnosci cieniowania
     }
 }
 
-// Prze³¹czenie oœwietlenia
+/**
+ * @brief Przelaczenie oswietlenia.
+ */
 void Engine::toggleLighting() {
     static bool lightingEnabled = true;
     if (lightingEnabled) {
-        glDisable(GL_LIGHTING); // Wy³¹cz oœwietlenie
+        glDisable(GL_LIGHTING); // Wylacz oswietlenie
     }
     else {
-        glEnable(GL_LIGHTING); // W³¹cz oœwietlenie
+        glEnable(GL_LIGHTING); // Wlacz oswietlenie
     }
-    lightingEnabled = !lightingEnabled; // Prze³¹cz stan oœwietlenia
+    lightingEnabled = !lightingEnabled; // Przelacz stan oswietlenia
 }
-
-// Aktualizacja pozycji obiektu
+/**
+ * @brief Aktualizacja pozycji obiektu.
+ *
+ * @param x Pozycja kursora myszy w osi X.
+ * @param y Pozycja kursora myszy w osi Y.
+ */
 void Engine::updateObjectPosition(int x, int y) {
-    GLint viewport[4];
-    GLdouble modelview[16];
-    GLdouble projection[16];
-    GLfloat winX, winY, winZ;
-    GLdouble posX, posY, posZ;
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-    glGetDoublev(GL_PROJECTION_MATRIX, projection);
+    GLint viewport[4];               // Tablica przechowujaca parametry widoku
+    GLdouble modelview[16];          // Macierz modelu widoku
+    GLdouble projection[16];         // Macierz projekcji
+    GLfloat winX, winY, winZ;        // Wspolrzedne okna
+    GLdouble posX, posY, posZ;       // Wspolrzedne swiata
 
-    winX = (float)x;
-    winY = (float)viewport[3] - (float)y; // Przekszta³cenie wspó³rzêdnych okna
-    glReadPixels(x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+    glGetIntegerv(GL_VIEWPORT, viewport);                   // Pobranie parametrow widoku
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);           // Pobranie macierzy modelu widoku
+    glGetDoublev(GL_PROJECTION_MATRIX, projection);         // Pobranie macierzy projekcji
 
-    if (winZ == 1.0f) winZ = 0.999f;
-    gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+    winX = static_cast<float>(x);                           // Ustawienie wspolrzednej X okna
+    winY = static_cast<float>(viewport[3] - y);             // Przeksztalcenie wspolrzednych okna Y
+    glReadPixels(x, static_cast<int>(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ); // Odczytanie komponentu glebokosci
 
-    instance->objectPosX = posX;
-    instance->objectPosY = posY;
-    instance->objectPosZ = posZ;
+    if (winZ == 1.0f) winZ = 0.999f;                        // Korekta wartosci glebokosci
+    gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ); // Przeksztalcenie wspolrzednych okna na wspolrzedne swiata
+
+    instance->objectPosX = posX;                            // Aktualizacja pozycji X obiektu
+    instance->objectPosY = posY;                            // Aktualizacja pozycji Y obiektu
+    instance->objectPosZ = posZ;                            // Aktualizacja pozycji Z obiektu
     std::cout << "Kliknieto w: (" << x << ", " << y << "), wspolrzedne swiata: (" << instance->objectPosX << ", " << instance->objectPosY << ", " << instance->objectPosZ << ")" << std::endl;
 }
 
-// Rysowanie sceny
+/**
+ * @brief Rysowanie sceny.
+ */
 void Engine::drawScene() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Czyszczenie buforow koloru i glebokosci
     glLoadIdentity();
 
     // Zastosowanie transformacji kamery
     camera.apply();
 
-    // Ustawienie pozycji œwiat³a
+    // Ustawienie pozycji swiatla
     GLfloat lightPos[] = { 1.0, 1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
-    // Rysowanie wybranego kszta³tu
+    // Rysowanie wybranego ksztaltu
     drawShape();
 
     glutSwapBuffers();
 }
 
-// Rysowanie kszta³tu
+/**
+ * @brief Rysowanie ksztaltu.
+ */
 void Engine::drawShape() {
-    glColor3f(0.0f, 0.0f, 1.0f); // Ustawienie koloru na czerwony
+    glColor3f(0.0f, 0.0f, 1.0f); // Ustawienie koloru na niebieski
     glPushMatrix();
     glTranslatef(objectPosX, objectPosY, objectPosZ); // Ustawienie pozycji obiektu
-    glRotatef(rotationX, 1.0, 0.0, 0.0); // Obrót wzd³u¿ osi X
-    glRotatef(rotationY, 0.0, 1.0, 0.0); // Obrót wzd³u¿ osi Y
+    glRotatef(rotationX, 1.0, 0.0,
+
+        0.0); // Obrot wzdluz osi X
+    glRotatef(rotationY, 0.0, 1.0, 0.0); // Obrot wzdluz osi Y
 
     if (currentShape != lastShape) {
         // Aktualizacja zmiennej lastShape
         lastShape = currentShape;
-        // Wyœwietlenie komunikatu tylko raz, gdy kszta³t siê zmienia
+        // Wyswietlenie komunikatu tylko raz, gdy ksztalt sie zmienia
         switch (currentShape) {
         case 'c':
         case 'C':
@@ -327,7 +407,7 @@ void Engine::drawShape() {
             break;
         case 's':
         case 'S':
-            std::cout << "Rysujemy kulê o promieniu : " << radius << std::endl;
+            std::cout << "Rysujemy kule o promieniu : " << radius << std::endl;
             break;
         case 't':
         case 'T':
@@ -339,7 +419,7 @@ void Engine::drawShape() {
             break;
         case 'n':
         case 'N':
-            std::cout << "Rysujemy stozek o wysokoœci " << height << std::endl;
+            std::cout << "Rysujemy stozek o wysokosci " << height << std::endl;
             break;
         case 'p':
         case 'P':
@@ -385,7 +465,9 @@ void Engine::drawShape() {
     glPopMatrix();
 }
 
-// Animacja obiektu
+/**
+ * @brief Animacja obiektu.
+ */
 void Engine::animateObject() {
     if (animate) {
         rotationX += rotationSpeedX;
@@ -397,7 +479,11 @@ void Engine::animateObject() {
     }
 }
 
-// Funkcja callback timera
+/**
+ * @brief Funkcja callback timera.
+ *
+ * @param value Wartosc przekazywana do funkcji callback.
+ */
 void Engine::timerCallback(int value) {
     if (instance->running) {
         instance->animateObject();
@@ -406,31 +492,43 @@ void Engine::timerCallback(int value) {
     }
 }
 
-// Zmiana koloru t³a
+/**
+ * @brief Zmiana koloru tla.
+ */
 void Engine::changeBackgroundColor() {
-    float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
     setClearColor(r, g, b, 1.0f);
     std::cout << "Zmieniono kolor tla na: (" << r << ", " << g << ", " << b << ")" << std::endl;
 }
 
-// Zmiana pozycji kamery
+/**
+ * @brief Zmiana pozycji kamery.
+ *
+ * @param dx Przesuniecie kamery w osi X.
+ * @param dy Przesuniecie kamery w osi Y.
+ * @param dz Przesuniecie kamery w osi Z.
+ */
 void Engine::changeCameraPosition(float dx, float dy, float dz) {
     // Aktualizacja pozycji kamery
     camera.move(dx, dy, dz);
 }
 
-// Zmiana wartoœci FPS
+/**
+ * @brief Zmiana wartosci FPS.
+ *
+ * @param delta Zmiana liczby klatek na sekunde.
+ */
 void Engine::changeFPS(int delta) {
     instance->fps += delta;
-    if (instance->fps < 1) instance->fps = 1; // FPS nie mo¿e byæ mniejszy ni¿ 1
+    if (instance->fps < 1) instance->fps = 1; // FPS nie moze byc mniejszy niz 1
     std::cout << "FPS zmienione na: " << instance->fps << std::endl;
-    // Zaktualizuj timer z now¹ wartoœci¹ FPS
+    // Zaktualizuj timer z nowa wartoscia FPS
     glutTimerFunc(1000 / instance->fps, timerCallback, 0);
 }
 
-// G³ówna funkcja programu
+// Glowna funkcja programu
 int main(int argc, char** argv) {
     Engine engine(argc, argv);
     engine.initWindow(1440, 900, "Game Engine", false);

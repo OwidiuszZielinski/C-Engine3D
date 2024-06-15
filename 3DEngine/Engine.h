@@ -21,7 +21,7 @@ public:
     static void specialKeyCallback(int key, int x, int y);
     static void mouseCallback(int button, int state, int x, int y);
     static void changeFPS(int fps);
-    static void timerCallback(int value);  // Deklaracja funkcji timerCallback
+    static void timerCallback(int value); 
     static void toggleLighting();
     
     static Engine* instance;
@@ -30,7 +30,7 @@ private:
     void drawScene();
     void drawShape();
     void updateObjectPosition(int x, int y);
-    void animateObject(); // Nowa metoda do animacji obiektu
+    void animateObject(); 
 
     bool running;
     int fps;

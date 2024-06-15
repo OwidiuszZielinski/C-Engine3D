@@ -12,4 +12,4 @@ public:
     static void drawTriangle(float size);
 };
 
-#endif // SHAPEDRAWER_H
+#endif 
